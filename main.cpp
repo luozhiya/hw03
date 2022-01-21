@@ -48,7 +48,7 @@ constexpr decltype(auto) vector_operator(std::vector<T1> const& a, std::vector<T
     auto x = a.cbegin();
     auto y = b.cbegin();
     for (; x != a.cend() && y != b.cend(); ++x, ++y)
-        out.push_back(std::move(cal_ops<T1, T2, ops>(*x, *y))); // NO RVO
+        out.push_back(cal_ops<T1, T2, ops>(*x, *y)); // NO RVO
     return out; //NRVO
 }
 
@@ -77,6 +77,7 @@ constexpr decltype(auto) operator/(std::vector<T1> const& a, std::vector<T2> con
 
 template<class O, class V, class R, Operator ops, size_t N>
 constexpr decltype(auto) op_vector_v(O& o, V const& a, R const& b) noexcept {
+    std::cout << "11111111111111111111" << std::endl;
     if (N == a.index()) {
         auto& e = std::get<N>(a);
         if constexpr (ops == Operator::Add) o = e + b;
@@ -144,6 +145,7 @@ constexpr decltype(auto) operator/(std::vector<T> const& b, std::variant<Args...
 template<class O, class V, Operator ops, size_t N>
 constexpr decltype(auto) op_variant_v(O& o, V const& a) noexcept {
     static_assert(ops == Operator::Add || ops == Operator::Sub || ops == Operator::Mul || ops == Operator::Div);
+    std::cout << "22222222222222222222" << std::endl;
     if (N == a.index()) {
         auto& e = std::get<N>(a);
         if constexpr (ops == Operator::Add) o = o + e;
@@ -220,11 +222,14 @@ int main() {
     std::cout << c << std::endl;
 
     std::variant<std::vector<int>, std::vector<double>> d = c;
-    std::variant<std::vector<int>, std::vector<double>> e = a;
-    d = d + c + e;
+    d = d + c;
 
-    // 应该输出 {9.28, 17.436, 7.236}
-    std::cout << d << std::endl;
+    //std::variant<std::vector<int>, std::vector<double>> d = c;
+    //std::variant<std::vector<int>, std::vector<double>> e = a;
+    //d = d + c + e;
+
+    //// 应该输出 {9.28, 17.436, 7.236}
+    //std::cout << d << std::endl;
 
     return 0;
 }
